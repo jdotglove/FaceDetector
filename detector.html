@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+
+
+
+<script src="https://download.affectiva.com/js/3.2/affdex.js"></script>
+
+<script type="text/javascript">
+
+
+/*
+ * Must run on a remote server, and access via https not http.
+ * Works on Chrome, but not on Safari.
+ */
+
+var width = 640;
+var height = 480;
+var detector;
+var happy, sad, angry;
+
+var feelings = new Array(3)
+for (var i = 0; i < 3; i++)
+{
+  feelings[i] = new Array(3);
+  for (var j = 0; j < 3; j++)
+  {
+    feelings[i][j] = new Array(5);
+  }
+}
+
+//Happy
+
+//Music
+feelings[0][0][0] = "https://itunes.apple.com/us/playlist/its-lit/pl.2d4d74790f074233b82d07bfae5c219c";
+feelings[0][0][1] = "https://itunes.apple.com/us/playlist/i-miss-the-00s/pl.e50ccee7318043eaaf8e8e28a2a55114";
+feelings[0][0][2] = "https://itunes.apple.com/us/playlist/all-day-dance-party/pl.463c885fdf8b4745881901cc4b912357";
+feelings[0][0][3] = "https://itunes.apple.com/us/playlist/i-miss-90s-r-b/pl.5c7a6dfe62c647849e9679dae0b6b560";
+feelings[0][0][4] = "https://itunes.apple.com/us/playlist/pop-hits-party/pl.ac3ff525be124f0086a463d348270bba";
+
+//Food
+feelings[0][1][0] = "https://www.grubhub.com/restaurant/noor-mediterranean-grill-136-college-ave-somerville/289672";
+feelings[0][1][1] = "https://www.grubhub.com/restaurant/city-slicker-cafe-588-somerville-ave-somerville/497486";
+feelings[0][1][2] = "https://www.grubhub.com/restaurant/noodle-market-470-massachusetts-ave-arlington/439460";
+feelings[0][1][3] = "https://www.grubhub.com/restaurant/wok-n-talk-525-washington-st-brighton/317725";
+feelings[0][1][4] = "https://www.grubhub.com/restaurant/wings-over-somerville-519-somerville-ave-somerville/261092";
+
+//Videos
+feelings[0][2][0] = "https://www.youtube.com/watch?v=iLnjG9bHpcU";
+feelings[0][2][1] = "https://www.youtube.com/watch?v=Anyy-KaxlrQ";
+feelings[0][2][2] = "https://www.youtube.com/watch?v=UiBBfWyApyA";
+feelings[0][2][3] = "https://www.youtube.com/watch?v=TZUYs8oYuBM";
+feelings[0][2][4] = "https://www.youtube.com/watch?v=J0Eo-6N0-nU";
+
+
+
+//Angry
+
+//Music
+feelings[1][0][0] = "https://itunes.apple.com/us/playlist/todays-chill/pl.2bb29727dbc34a63936787297305c37c";
+feelings[1][0][1] = "https://itunes.apple.com/us/playlist/relax/pl.5cc71a7325f8405c8c420ea382d66040";
+feelings[1][0][2] = "https://itunes.apple.com/us/playlist/vibes/pl.d6f5a44a25664f508078216de584ba0d";
+feelings[1][0][3] = "https://itunes.apple.com/us/playlist/unwind/pl.c6b0ecb695eb4fcea3476050fdb4e1bb";
+feelings[1][0][4] = "https://itunes.apple.com/us/playlist/pillow-talk/pl.e568b4d810d64f70a87be357df593052";
+
+//Cool Places
+feelings[1][1][0] = "http://www.mfa.org/";
+feelings[1][1][1] = "https://www.boston.gov/parks/public-garden";
+feelings[1][1][2] = "http://www.bostonathenaeum.org/";
+feelings[1][1][3] = "https://www.sixflags.com/newengland";
+feelings[1][1][4] = "http://bostonharbor.com/";
+
+//Videos
+feelings[1][2][0] = "https://www.youtube.com/watch?v=JxJsai5nkGI";
+feelings[1][2][1] = "https://www.youtube.com/watch?v=08uSal5PY-U";
+feelings[1][2][2] = "https://www.youtube.com/watch?v=fpw37HP1e1U";
+feelings[1][2][3] = "https://www.youtube.com/watch?v=naleynXS7yo";
+feelings[1][2][4] = "https://www.youtube.com/watch?v=kH6QJzmLYtw";
+
+
+
+
+//Sad
+
+//Music
+feelings[2][0][0] = "https://itunes.apple.com/us/playlist/essential-breakup-songs/pl.536240edbf6f493898278eed8660dfa9";
+feelings[2][0][1] = "https://itunes.apple.com/us/playlist/tearjerkers/pl.eee5aa464ad440c0a6b355222d736207";
+feelings[2][0][2] = "https://itunes.apple.com/us/playlist/dancing-with-tears-in-my-eyes/pl.730e1f30aebd49ec97bd5e818635a2dd";
+feelings[2][0][3] = "https://itunes.apple.com/us/playlist/heartbreak-hotel/pl.d8a6f79bbbd740248b74751d292f9c55";
+feelings[2][0][4] = "https://itunes.apple.com/us/playlist/melancholy-strings/pl.4f02b7dc4ce341db8cac2faf6ce60b54";
+
+//Food
+feelings[2][1][0] = "https://www.grubhub.com/restaurant/jp-licks-4a-college-ave-somerville/328414";
+feelings[2][1][1] = "https://www.grubhub.com/restaurant/ben-and-jerrys-36-jfk-st-cambridge/328058";
+feelings[2][1][2] = "https://www.grubhub.com/restaurant/roses-chinese-restaurant-321-boston-ave-medford/260314";
+feelings[2][1][3] = "https://www.grubhub.com/restaurant/mainely-burgers-704-massachusetts-ave-cambridge/339141";
+feelings[2][1][4] = "https://www.grubhub.com/restaurant/ihop-store-3151-16-eliot-st--ste-18-cambridge/376386";
+
+//Videos
+feelings[2][2][0] = "https://www.youtube.com/watch?v=GXs0dkU3EeE";
+feelings[2][2][1] = "https://www.youtube.com/watch?v=sg1m2RJwyEU";
+feelings[2][2][2] = "https://www.youtube.com/watch?v=wAEzpwvrveg";
+feelings[2][2][3] = "https://www.youtube.com/watch?v=DTO092mDOFk";
+feelings[2][2][4] = "https://www.youtube.com/watch?v=8CmeDu7K7f4";
+
+onload = function myFunction () {
+
+  document.getElementById("myDropdown").classList.toggle("show");
+}
+
+function f_detector() {
+      // SDK Needs to create video and canvas nodes in the DOM in order to function
+      // Here we are adding those nodes a predefined div.
+      var divRoot = document.getElementById("affdex_elements")
+
+      //Construct a CameraDetector and specify the image width / height and face detector mode.
+      detector = new affdex.CameraDetector(divRoot, width, height, affdex.FaceDetectorMode.LARGE_FACES);
+
+      //Enable detection of all Expressions, Emotions and Emojis classifiers.
+      detector.detectAllEmotions();
+      detector.detectAllExpressions();
+      detector.detectAllEmojis();
+      detector.detectAllAppearance();
+
+      //Add a callback to notify when the detector is initialized and ready for runing.
+      detector.addEventListener("onInitializeSuccess", function() {
+        log('logs', "The detector reports initialized");
+        //Display canvas instead of video feed because we want to draw the feature points on it
+	document.getElementById("face_video_canvas").style.display = "block";
+	document.getElementById("face_video").style.display = "none";
+      });
+
+      //Add a callback to notify when camera access is allowed
+      detector.addEventListener("onWebcamConnectSuccess", function() {
+        log('logs', "Webcam access allowed");
+      });
+
+      //Add a callback to notify when camera access is denied
+      detector.addEventListener("onWebcamConnectFailure", function() {
+        log('logs', "webcam denied");
+        console.log("Webcam access denied");
+      });
+
+      //Add a callback to notify when detector is stopped
+      detector.addEventListener("onStopSuccess", function() {
+        log('logs', "The detector reports stopped");
+	document.getElementById("results").innerHTML = ""
+      });
+
+      //Add a callback to receive the results from processing an image.
+      //The faces object contains the list of the faces detected in an image.
+      //Faces object contains probabilities for all the different expressions, emotions and appearance metrics
+      detector.addEventListener("onImageResultsSuccess", function(faces, image, timestamp) {
+	document.getElementById("results").innerHTML = ""
+        log('results', "Timestamp: " + timestamp.toFixed(2));
+        log('results', "Number of faces found: " + faces.length);
+        if (faces.length > 0) {
+          log('results', "Appearance: " + JSON.stringify(faces[0].appearance));
+          log('results', "Emotions: " + JSON.stringify(faces[0].emotions, function(key, val) {
+            return val.toFixed ? Number(val.toFixed(0)) : val;
+          }));
+          log('results', "Expressions: " + JSON.stringify(faces[0].expressions, function(key, val) {
+            return val.toFixed ? Number(val.toFixed(0)) : val;
+          }));
+          log('results', "Emoji: " + faces[0].emojis.dominantEmoji);
+          drawFeaturePoints(image, faces[0].featurePoints);
+
+	  // Primitive UI for happy
+	  if (faces[0].emotions["joy"]>75) {
+
+		  document.getElementById("myui").innerHTML = "Happy!!!"
+      onStop();
+      window.open(happy);
+
+	  }
+
+    if (faces[0].emotions["sadness"]>75)
+    {
+      document.getElementById("myui").innerHTML = "Unhappy :("
+      onStop();
+      window.open(sad);
+    }
+
+    if (faces[0].emotions["anger"]>75)
+    {
+      document.getElementById("myui").innerHTML = "Angry! >:("
+      onStop();
+      window.open(angry);
+    }
+	  else {
+		  document.getElementById("myui").innerHTML = ""
+	  }
+	}
+      });
+}
+
+window.onclick = function(event) {
+
+  if (!event.target.matches('.dropbtn')) {
+
+    var dropdowns = document.getElementsByClassName("dropdown-content");
+    var i;
+    for (i = 0; i < dropdowns.length; i++) {
+      var openDropdown = dropdowns[i];
+      if (openDropdown.classList.contains('show')){
+        openDropdown.classList.remove('show');
+      }
+    }
+  }
+}
+
+function setSelected(tag, value) {
+
+  var choice = Math.floor(Math.random() * 5);
+
+  if (tag == "hap")
+  {
+    if (value == "mus")
+    {
+      happy = feelings[0][0][choice];
+    }
+    else if (value == "food")
+    {
+      happy = feelings[0][1][choice];
+    }
+    else if (value == "vid")
+    {
+      happy = feelings[0][2][choice];
+    }
+  }
+  else if (tag == "mad")
+  {
+    if (value == "mus")
+    {
+      angry = feelings[1][0][choice];
+    }
+    else if (value == "place")
+    {
+      angry = feelings[1][1][choice];
+    }
+    else if (value == "vid")
+    {
+      angry = feelings[1][2][choice];
+    }
+
+  }
+  else if (tag == "sad")
+  {
+    if (value == "mus")
+    {
+      sad = feelings[2][0][choice]; 
+    }
+    else if (value == "food")
+    {
+      sad = feelings[2][1][choice];
+    }
+    else if (value == "vid")
+    {
+      sad = feelings[2][2][choice];
+    }
+  }
+}
+
+function log(node_name, msg) {
+	document.getElementById(node_name).innerHTML += "<span>" + msg + "</span><br/>"
+}
+
+//function executes when Start button is pushed.
+function onStart() {
+  f_detector();
+  if (detector && !detector.isRunning) {
+    document.getElementById("logs").innerHTML = ""
+    detector.start();
+  }
+  log('logs', "Clicked the start button");
+}
+
+//function executes when the Stop button is pushed.
+function onStop() {
+  log('logs', "Clicked the stop button");
+  if (detector && detector.isRunning) {
+    detector.removeEventListener();
+    detector.stop();
+  }
+};
+
+//function executes when the Reset button is pushed.
+function onReset() {
+  log('logs', "Clicked the reset button");
+  if (detector && detector.isRunning) {
+    detector.reset();
+    document.getElementById("results").innerHTML = ""
+  }
+}
+
+//Draw the detected facial feature points on the image
+function drawFeaturePoints(img, featurePoints) {
+  var c = document.getElementById("face_video_canvas");
+  if (c==null) return;
+  var contxt = c.getContext('2d');
+
+  var hRatio = contxt.canvas.width / img.width;
+  var vRatio = contxt.canvas.height / img.height;
+  var ratio = Math.min(hRatio, vRatio);
+
+  contxt.strokeStyle = "#FFFFFF";
+  for (var id in featurePoints) {
+    contxt.beginPath();
+    contxt.arc(featurePoints[id].x,
+      featurePoints[id].y, 2, 0, 2 * Math.PI);
+    contxt.stroke();
+  }
+}
+</script>
+<h1>
+  What Do You Like to Do When You Are...?
+</h1>
+<div class= "dropdown">
+  <button id="myDropdown" class="dropbtn">Happy</button>
+  <div id="Happy" class="dropdown-content">
+    <button id = "hap_mus" onclick="setSelected('hap','mus')">
+    <option value="music" value="music">Listen to Music</option>
+    </button>
+    <button id = "hap_food" onclick="setSelected('hap','food')">
+    <option value = "food" value="food">Eat Food</option>
+    </button>
+    <button id = "hap_vid" onclick="setSelected('hap','vid')">
+    <option value = "videos" value="videos">Watch Videos</option>
+    </button>
+    <style>
+       /* Dropdown Button */
+.dropbtn {
+    background-color: #4CAF50;
+    color: white;
+    padding: 16px;
+    font-size: 16px;
+    border: none;
+    cursor: pointer;
+}
+
+/* The container <div> - needed to position the dropdown content */
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+/* Dropdown Content (Hidden by Default) */
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #f9f9f9;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+}
+
+/* Links inside the dropdown */
+.dropdown-content a {
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+}
+
+/* Change color of dropdown links on hover */
+.dropdown-content a:hover {background-color: #f1f1f1}
+
+/* Show the dropdown menu on hover */
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+/* Change the background color of the dropdown button when the dropdown content is shown */
+.dropdown:hover .dropbtn {
+    background-color: #3e8e41;
+}
+    </style>
+  </div>
+</div>
+
+<div class= "dropdown">
+  <button id="myDropdown" class="dropbtn">Angry</button>
+  <div id="Mad" class="dropdown-content">
+    <button id = "mad_mus" onclick="setSelected('mad','mus')">
+    <option value="music">Listen to Music</option>
+    </button>
+    <button id = "mad_place" onclick="setSelected('mad','place')">
+    <option value="places">Go Somewhere Cool</option>
+    </button>
+    <button id = "mad_vid" onclick="setSelected('mad','vid')">
+    <option value="mad_vid">Watch Videos</option>
+    </button>
+    <style>
+       /* Dropdown Button */
+.dropbtn {
+    background-color: #4CAF50;
+    color: white;
+    padding: 16px;
+    font-size: 16px;
+    border: none;
+    cursor: pointer;
+}
+
+/* The container <div> - needed to position the dropdown content */
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+/* Dropdown Content (Hidden by Default) */
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #f9f9f9;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+}
+
+/* Links inside the dropdown */
+.dropdown-content a {
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+}
+
+/* Change color of dropdown links on hover */
+.dropdown-content a:hover {background-color: #f1f1f1}
+
+/* Show the dropdown menu on hover */
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+/* Change the background color of the dropdown button when the dropdown content is shown */
+.dropdown:hover .dropbtn {
+    background-color: #3e8e41;
+}
+    </style>
+  </div>
+</div>
+
+<div class= "dropdown">
+  <button id= "myDropdown" class="dropbtn">Sad</button>
+  <div id="Sad" class="dropdown-content">
+    <button id = "sad_mus" onclick="setSelected('sad','mus')">
+    <option value="music">Listen to Music</option>
+    </button>
+    <button id = "sad_food" onclick="setSelected('sad','food')">
+    <option value="food">Eat Food</option>
+    </button>
+    <button id = "sad_vid" onclick="setSelected('sad','vid')">
+    <option value="videos">Watch Videos</option>
+    </button>
+    <style>
+       /* Dropdown Button */
+.dropbtn {
+    background-color: #4CAF50;
+    color: white;
+    padding: 16px;
+    font-size: 16px;
+    border: none;
+    cursor: pointer;
+}
+
+/* The container <div> - needed to position the dropdown content */
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+/* Dropdown Content (Hidden by Default) */
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #f9f9f9;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+}
+
+/* Links inside the dropdown */
+.dropdown-content a {
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+}
+
+/* Change color of dropdown links on hover */
+.dropdown-content a:hover {background-color: #f1f1f1}
+
+/* Show the dropdown menu on hover */
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+/* Change the background color of the dropdown button when the dropdown content is shown */
+.dropdown:hover .dropbtn {
+    background-color: #3e8e41;
+}
+    </style>
+  </div>
+</div>
+
+</head>
+<body>
+  <div>
+    <div>
+      <button id="start" onclick="onStart()" visiblity="hidden">Start</button>
+      <button id="stop" onclick="onStop()">Stop</button>
+      <button id="reset" onclick="onReset()">Reset</button>
+      <h3>Comp 86 Homework 8</h3>
+      <p>
+        <strong>Instructions</strong>
+        </br>
+        Press the start button to start the detector.
+        <br/> When a face is detected, the probabilities of the different emotions are written to the DOM.
+        <br/> Press the stop button to end the detector.
+      </p>
+    </div>
+
+    <div>
+      <div id="affdex_elements" style="width:680px;height:480px;"></div>
+      <div>
+        <div>
+	  <br/><br/><br/><br/>
+          <strong>Test UI</strong>
+	  <br/><br/><br/><br/><br/>
+	  <div id="myui" style="color:red;"></div>
+        </div>
+        <div style="height:25em;">
+          <strong>Emotion Tracking Results</strong>
+          <div id="results" style="word-wrap:break-word;"></div>
+        </div>
+        <div>
+          <strong>Detector Log Msgs</strong>
+	  <div id="logs"></div>
+        </div>
+    </div>
+  </div>
+</body>
+</html>
